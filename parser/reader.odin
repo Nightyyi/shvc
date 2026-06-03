@@ -29,7 +29,6 @@ read_all :: proc(filepath: string, allocator := context.allocator) -> ^Tokenizer
 			break
 		}
 		// cleanup
-		defer delete(line, context.temp_allocator)
 		// line = strings.trim_right(line, "\r")
 
 		inject_src(tokenizer, line)

@@ -9,8 +9,10 @@ import "core:unicode/utf8"
 import "tokens"
 
 Tokenizer :: struct {
-	source: [dynamic]rune, // somehow
-	cursor: int, // index of the cursor, each index is one rune
+	source:       [dynamic]rune, // somehow
+	cursor:       int, // index of the cursor, each index is one rune
+	peeked_token: tokens.Token,
+	has_peeked:   bool,
 }
 
 new_tokenizer :: proc(allocator: runtime.Allocator) -> ^Tokenizer { 	// i dont know the size of the source code ahead of time
@@ -45,6 +47,12 @@ is_ident_char :: proc(r: rune) -> bool {
 	return unicode.is_alpha(r) || unicode.is_digit(r) || r == '_'
 }
 
+rollback_token :: proc(tokenizer: ^Tokenizer) {
+	if tokenizer.cursor > 0 {
+		tokenizer.cursor -= 1
+	}
+}
+
 peek_next :: proc(tokenizer: ^Tokenizer) -> (result: rune, ok: bool) #optional_ok {
 	// sometimes throw and catch aint that bad honestly
 	// just thinking about bobbing the error makes me nauseous
@@ -66,7 +74,7 @@ cleanup_temp_alloc :: proc(result: tokens.Token) -> tokens.Token {
 }
 
 @(deferred_out = cleanup_temp_alloc)
-next_token :: proc(tokenizer: ^Tokenizer, allocator: runtime.Allocator) -> tokens.Token {
+scan_token :: proc(tokenizer: ^Tokenizer, allocator: runtime.Allocator) -> tokens.Token {
 	skip_whitespace_and_comments(tokenizer)
 
 	if is_at_end(tokenizer) {
@@ -260,6 +268,23 @@ next_token :: proc(tokenizer: ^Tokenizer, allocator: runtime.Allocator) -> token
 	panic("unexpected character")
 }
 
+next_token :: proc(tokenizer: ^Tokenizer, allocator: runtime.Allocator) -> tokens.Token {
+	if tokenizer.has_peeked {
+		tokenizer.has_peeked = false
+		return tokenizer.peeked_token
+	}
+
+	return scan_token(tokenizer, allocator)
+}
+
+peek_token :: proc(tokenizer: ^Tokenizer, allocator: runtime.Allocator) -> tokens.Token {
+	if !tokenizer.has_peeked {
+		tokenizer.peeked_token = scan_token(tokenizer, allocator)
+		tokenizer.has_peeked = true
+	}
+
+	return tokenizer.peeked_token
+}
 
 // if true means success
 // if false it means the user forgot to close their comments (probably)

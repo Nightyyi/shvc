@@ -1,45 +1,46 @@
 package ast
 
+import "../stock_types"
 import "../tokens"
 
-Type :: union {}
 
 Type_Pair :: struct {
 	name: string, // TODO: think of namespacing
-	type: Type,
-}
-
-Program :: struct {
-	statements: [dynamic]^AST_Node,
+	type: stock_types.Types,
 }
 
 Block :: struct {
-	statements: [dynamic]^AST_Node,
+	items: ^[dynamic]^AST_Node,
 }
+
+Program :: struct {
+	statements: Block,
+}
+
 
 Var_Decl :: struct {
 	name:      string,
 	is_mut:    bool,
-	type_info: Type,
+	type_info: stock_types.Types,
 	init_expr: ^AST_Node,
 }
 
 Fn_Decl :: struct {
 	name:     string,
-	args:     [dynamic]Type_Pair,
-	ret_type: Type,
-	body:     ^AST_Node,
+	args:     ^[dynamic]Type_Pair,
+	ret_type: stock_types.Types,
+	body:     Block,
 }
 
 Struct_Decl :: struct {
 	name:   string,
-	fields: [dynamic]Type_Pair,
+	fields: ^[dynamic]Type_Pair,
 }
 
 If_Stmt :: struct {
 	// TODO: think of many branches
 	condition: ^AST_Node,
-	body:      ^AST_Node,
+	body:      Block,
 }
 
 For_Loop :: struct {
@@ -47,7 +48,7 @@ For_Loop :: struct {
 	init: ^AST_Node,
 	cond: ^AST_Node,
 	step: ^AST_Node,
-	body: ^AST_Node,
+	body: Block,
 }
 
 Identifier :: struct {
@@ -55,7 +56,7 @@ Identifier :: struct {
 }
 
 Literal :: struct {
-	type:  Type,
+	type:  stock_types.Types,
 	value: string,
 }
 

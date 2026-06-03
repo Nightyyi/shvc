@@ -52,3 +52,7 @@ destroy_stack :: proc(s: ^Stack($T)) {
 		pop(s)
 	}
 }
+
+is_empty :: proc(s: ^Stack($T)) -> bool {
+	return s.len == 0
+}

@@ -55,19 +55,23 @@ String_Literal :: struct {
 }
 
 Token :: union {
-	// operators
+	// end
 	Eof,
 	Colon,
 	Arrow,
-	Caret,
 	Ampersand,
-	Assign,
 	Comma,
+
+	// unary
+	Caret,
 	Semi_Colon,
+	Slash,
+
+	// binary
+	Assign,
 	Plus,
 	Minus,
 	Star,
-	Slash,
 	Equal,
 	Not_Equal,
 	Less,
