@@ -10,6 +10,10 @@ Integer64 :: struct {}
 
 String :: struct {}
 
+Pointer :: struct {
+	elem: ^Types,
+}
+
 Types :: union {
 	Unit,
 	Integer,
@@ -17,4 +21,5 @@ Types :: union {
 	Integer32,
 	Integer64,
 	String,
+	Pointer,
 }

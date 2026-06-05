@@ -37,7 +37,7 @@ create_leaf_node :: proc(token: tokens.Token, alloc: runtime.Allocator) -> ^ast.
 	case tokens.Int_Literal:
 		node^ = ast.Literal { 	// TODO: separate Int and String literal
 			type  = types.Integer64{},
-			value = fmt.aprintf("%d", t.content, alloc),
+			value = fmt.aprintf("%d", t.content, allocator = alloc),
 		}
 		return node
 	case tokens.String_Literal:
@@ -148,6 +148,7 @@ parse_expression :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^as
 	operand_stack := stack.make_stack(^ast.AST_Node, context.temp_allocator)
 
 	open_paren_count := 0
+	expecting_op := false // flag if we are in infix / postfix
 
 	outer: for {
 		token := peek_token(tokenizer, arena)
@@ -168,6 +169,13 @@ parse_expression :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^as
 
 		#partial switch t in token {
 		case tokens.Identifier:
+			if expecting_op {
+				// we have operand but we hit another identifier after
+				// this means the expr ends
+				unget_token(tokenizer, token)
+				break outer
+			}
+
 			next := peek_token(tokenizer, arena)
 			if _, is_call := next.(tokens.Open_Paren); is_call {
 				// eat the (
@@ -206,12 +214,23 @@ parse_expression :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^as
 			} else {
 				stack.push(&operand_stack, create_leaf_node(token, arena))
 			}
+			expecting_op = true
 
 		case tokens.Int_Literal, tokens.String_Literal:
+			if expecting_op {
+				unget_token(tokenizer, token)
+				break outer
+			}
 			stack.push(&operand_stack, create_leaf_node(token, arena))
+			expecting_op = true
 		case tokens.Ampersand, tokens.Caret:
 			// unary opts
+			if expecting_op {
+				unget_token(tokenizer, token)
+				break outer
+			}
 			stack.push(&operator_stack, token)
+		// expecting_op remains false here cuz unary ops
 		case tokens.Assign,
 		     tokens.Plus,
 		     tokens.Minus,
@@ -222,6 +241,10 @@ parse_expression :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^as
 		     tokens.Less,
 		     tokens.Greater:
 			// binary opts
+			if !expecting_op {
+				panic("unexpected binary operator")
+			}
+
 			for !stack.is_empty(&operator_stack) {
 				top, _ := stack.peek(&operator_stack)
 
@@ -241,11 +264,20 @@ parse_expression :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^as
 			}
 
 			stack.push(&operator_stack, token)
+			expecting_op = false
+
 		case tokens.Open_Paren:
+			if expecting_op {
+				unget_token(tokenizer, token)
+				break outer
+			}
 			open_paren_count += 1
 			stack.push(&operator_stack, token)
 
 		case tokens.Close_Paren:
+			if !expecting_op {
+				panic("unexpected ')'")
+			}
 			open_paren_count -= 1
 			found_open := false
 
@@ -264,7 +296,13 @@ parse_expression :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^as
 			if !found_open {
 				panic("unmatched closing parenthesis")
 			}
+			expecting_op = true // closed paren acts like a completed operand
 
+		case:
+			// if we see keywords or tokens we have no idea what it is
+			// we should stop parsing now
+			unget_token(tokenizer, token)
+			break outer
 		}
 	}
 
@@ -442,9 +480,67 @@ parse_struct_signiture :: proc(
 	return structure
 }
 
-parse_var_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Arena) {
+parse_type :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> types.Types {
+	token := next_token(tokenizer, arena)
 
+	#partial switch t in token {
+	case tokens.Caret:
+		elem_type := parse_type(tokenizer, arena)
+		return types.Pointer{elem = new_clone(elem_type, arena)}
 
+	case tokens.Identifier:
+		return parse_type_from_identifier(t.content)
+
+	case:
+		panic("expected a valid type identifier or type modifier")
+	}
+}
+
+parse_var_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.AST_Node {
+	token := next_token(tokenizer, arena)
+	is_mutable := false
+
+	// check if its mut
+	if _, ok := token.(tokens.Mut); ok {
+		is_mutable = true
+		token = next_token(tokenizer, arena)
+	}
+
+	// next token is val
+	if _, ok := token.(tokens.Val); !ok {
+		panic("expected 'val' keyword in variable declaration")
+	}
+
+	// grab the var name
+	name_tok, ok := next_token(tokenizer, arena).(tokens.Identifier)
+	if !ok do panic("expected variable name identifier")
+
+	// a : for type
+	if _, ok := next_token(tokenizer, arena).(tokens.Colon); !ok {
+		panic("expected ':' after variable name")
+	}
+
+	// type parsing
+	var_type := parse_type(tokenizer, arena)
+
+	// expect a =
+	if _, ok := next_token(tokenizer, arena).(tokens.Assign); !ok {
+		panic("expected '=' after type specification")
+	}
+
+	// parse assignment
+	value_expr := parse_expression(tokenizer, arena)
+
+	// make node
+	node := new(ast.AST_Node, arena)
+	node^ = ast.Var_Decl {
+		name      = name_tok.content,
+		type_info = var_type,
+		is_mut    = is_mutable,
+		init_expr = value_expr,
+	}
+
+	return node
 }
 
 add_statement_to_block :: proc(block: ^ast.Block, statement: ^ast.AST_Node) {
@@ -530,8 +626,10 @@ parse_program :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.A
 			expr := parse_expression(tokenizer, arena)
 			add_statement_to_block(current_scope, expr)
 
-		case tokens.Val:
-			panic("var declarations not implemented")
+		case tokens.Val, tokens.Mut:
+			unget_token(tokenizer, token)
+			var_node := parse_var_decl(tokenizer, arena)
+			add_statement_to_block(current_scope, var_node)
 
 		case tokens.If:
 			panic("if statements not implemented")
