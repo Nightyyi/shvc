@@ -83,14 +83,14 @@ apply_operator :: proc(
 	operand_stack: ^stack.Stack(^ast.AST_Node),
 	arena: runtime.Allocator,
 ) {
-	op, ok := stack.pop(operator_stack)
-	if !ok {
+	op, ostack_ok := stack.pop(operator_stack)
+	if !ostack_ok {
 		panic("missing operator")
 	}
 
 	if is_unary(op) {
-		operand, ok := stack.pop(operand_stack)
-		if !ok {
+		operand, ostack_u_ok := stack.pop(operand_stack)
+		if !ostack_u_ok {
 			panic("missing unary operand")
 		}
 
@@ -343,18 +343,18 @@ parse_fn_signiture :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> a
 	fn.body = make_block(arena)
 
 	// consume (
-	if _, ok := next_token(tokenizer, arena).(tokens.Open_Paren); !ok {
+	if _, ntok := next_token(tokenizer, arena).(tokens.Open_Paren); !ntok {
 		panic("expected '('")
 	}
 
-	if _, ok := peek_token(tokenizer, arena).(tokens.Close_Paren); ok {
+	if _, ptok := peek_token(tokenizer, arena).(tokens.Close_Paren); ptok {
 		next_token(tokenizer, arena)
 	} else {
 		for {
-			arg_name_tok, ok := next_token(tokenizer, arena).(tokens.Identifier)
-			if !ok do panic("expected argument name")
+			arg_name_tok, idok := next_token(tokenizer, arena).(tokens.Identifier)
+			if !idok do panic("expected argument name")
 
-			if _, ok := next_token(tokenizer, arena).(tokens.Colon); !ok {
+			if _, colok := next_token(tokenizer, arena).(tokens.Colon); !colok {
 				panic("expected ':'")
 			}
 
@@ -384,7 +384,7 @@ parse_fn_signiture :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> a
 
 	fn.ret_type = types.Unit{}
 
-	if _, ok := peek_token(tokenizer, arena).(tokens.Arrow); ok {
+	if _, arok := peek_token(tokenizer, arena).(tokens.Arrow); arok {
 		next_token(tokenizer, arena)
 
 		ret_tok, ok := next_token(tokenizer, arena).(tokens.Identifier)
@@ -428,27 +428,27 @@ parse_struct_signiture :: proc(
 	fields_ptr^ = make([dynamic]ast.Type_Pair, arena)
 	structure.fields = fields_ptr
 
-	name_tok, ok := next_token(tokenizer, arena).(tokens.Identifier)
-	if !ok do panic("expected struct name")
+	name_tok, idok := next_token(tokenizer, arena).(tokens.Identifier)
+	if !idok do panic("expected struct name")
 
 	structure.name = name_tok.content
 
-	if _, ok := next_token(tokenizer, arena).(tokens.Open_Bracket); !ok {
+	if _, obok := next_token(tokenizer, arena).(tokens.Open_Bracket); !obok {
 		panic("expected '{'")
 	}
 
 	for {
-		if _, ok := peek_token(tokenizer, arena).(tokens.Close_Bracket); ok {
+		if _, cbok := peek_token(tokenizer, arena).(tokens.Close_Bracket); cbok {
 			next_token(tokenizer, arena)
 			break
 		}
-		if _, ok := peek_token(tokenizer, arena).(tokens.Close_Paren); ok {
+		if _, cpok := peek_token(tokenizer, arena).(tokens.Close_Paren); cpok {
 			next_token(tokenizer, arena)
 			break
 		}
 
-		field_name_tok, ok := next_token(tokenizer, arena).(tokens.Identifier)
-		if !ok do panic("expected field name")
+		field_name_tok, fidok := next_token(tokenizer, arena).(tokens.Identifier)
+		if !fidok do panic("expected field name")
 
 		if _, ok := next_token(tokenizer, arena).(tokens.Colon); !ok {
 			panic("expected ':'")
@@ -512,11 +512,11 @@ parse_var_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.
 	}
 
 	// grab the var name
-	name_tok, ok := next_token(tokenizer, arena).(tokens.Identifier)
-	if !ok do panic("expected variable name identifier")
+	name_tok, varnameok := next_token(tokenizer, arena).(tokens.Identifier)
+	if !varnameok do panic("expected variable name identifier")
 
 	// a : for type
-	if _, ok := next_token(tokenizer, arena).(tokens.Colon); !ok {
+	if _, colok := next_token(tokenizer, arena).(tokens.Colon); !colok {
 		panic("expected ':' after variable name")
 	}
 
@@ -566,16 +566,16 @@ parse_program :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.A
 	for {
 		token := next_token(tokenizer, arena)
 
-		if _, ok := token.(tokens.Eof); ok {
+		if _, eofok := token.(tokens.Eof); eofok {
 			break
 		}
 
-		if _, ok := token.(tokens.Semi_Colon); ok {
+		if _, scok := token.(tokens.Semi_Colon); scok {
 			continue
 		}
 
-		current_scope, ok := stack.peek(&scope_stack)
-		if !ok {
+		current_scope, stackok := stack.peek(&scope_stack)
+		if !stackok {
 			panic("internal parser error: empty scope stack")
 		}
 
@@ -588,7 +588,7 @@ parse_program :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.A
 
 			add_statement_to_block(current_scope, fn_node)
 
-			if _, ok := peek_token(tokenizer, arena).(tokens.Open_Bracket); ok {
+			if _, obok := peek_token(tokenizer, arena).(tokens.Open_Bracket); obok {
 				next_token(tokenizer, arena)
 				stack.push(&scope_stack, fn.body)
 			} else {
