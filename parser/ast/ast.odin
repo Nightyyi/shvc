@@ -22,11 +22,18 @@ Call :: struct {
 	args:   ^[dynamic]^AST_Node,
 }
 
+Var_Init_Kind :: enum {
+	Zero, // val a: i32
+	Expr, // val a: i32 = something
+	Undef, // val a: i32 = ?
+}
+
 Var_Decl :: struct {
 	name:      string,
 	is_mut:    bool,
 	type_info: stock_types.Types,
 	init_expr: ^AST_Node,
+	init_kind: Var_Init_Kind,
 }
 
 Fn_Decl :: struct {

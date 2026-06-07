@@ -825,13 +825,21 @@ parse_var_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.
 	// type parsing
 	var_type := parse_type(tokenizer, arena)
 
-	// expect a =
-	if _, ok := next_token(tokenizer, arena).(tokens.Assign); !ok {
-		panic("expected '=' after type specification")
-	}
+	// optional init
+	init_kind := ast.Var_Init_Kind.Zero
+	value_expr: ^ast.AST_Node = nil
 
-	// parse assignment
-	value_expr := parse_expression(tokenizer, arena)
+	if _, has_assign := peek_token(tokenizer, arena).(tokens.Assign); has_assign {
+		next_token(tokenizer, arena) // consume =
+
+		if _, is_question := peek_token(tokenizer, arena).(tokens.Question); is_question {
+			next_token(tokenizer, arena) // consume ?
+			init_kind = .Undef
+		} else {
+			value_expr = parse_expression(tokenizer, arena)
+			init_kind = .Expr
+		}
+	}
 
 	// make node
 	node := new(ast.AST_Node, arena)
@@ -839,6 +847,7 @@ parse_var_decl :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.
 		name      = name_tok.content,
 		type_info = var_type,
 		is_mut    = is_mutable,
+		init_kind = init_kind,
 		init_expr = value_expr,
 	}
 

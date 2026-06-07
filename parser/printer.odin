@@ -97,7 +97,13 @@ print_node :: proc(node: ^ast.AST_Node, indent: int) {
 		fmt.printf("Literal: %s (Type: %v)\n", v.value, v.type)
 
 	case ast.Var_Decl:
-		fmt.printf("Var_Decl: %s (Mut: %t, Type: %v)\n", v.name, v.is_mut, v.type_info)
+		fmt.printf(
+			"Var_Decl: %s (Mut: %t, Type: %v, Kind: %s)\n",
+			v.name,
+			v.is_mut,
+			v.type_info,
+			v.init_kind,
+		)
 		if v.init_expr != nil {
 			print_node(v.init_expr, indent + 1)
 		}
