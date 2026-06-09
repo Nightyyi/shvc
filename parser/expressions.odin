@@ -205,7 +205,7 @@ parse_expression :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^as
 				break outer
 			}
 
-			operand := parse_array_literal(tokenizer, arena)
+			operand := parse_braced_literal(tokenizer, arena)
 			operand = parse_postfix_expr(tokenizer, arena, operand)
 
 			stack.push(&operand_stack, operand)

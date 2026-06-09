@@ -45,3 +45,95 @@ parse_array_literal :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> 
 	}
 	return node
 }
+
+parse_struct_literal :: proc(
+	tokenizer: ^Tokenizer,
+	arena: runtime.Allocator,
+	first_token: tokens.Token,
+) -> ^ast.AST_Node {
+	fields_ptr := new([dynamic]ast.Struct_Literal_Field, arena)
+	fields_ptr^ = make([dynamic]ast.Struct_Literal_Field, arena)
+
+	// eat colon
+	next_token(tokenizer, arena)
+
+	// extrat first field string
+	first_name := first_token.(tokens.Identifier).content
+	first_val := parse_expression(tokenizer, arena)
+
+	append(fields_ptr, ast.Struct_Literal_Field{name = first_name, value = first_val})
+
+	// loop
+	for {
+		sep := next_token(tokenizer, arena)
+		#partial switch _ in sep {
+		case tokens.Comma:
+			// allow trailing commas: { x: 1, y: 2, }
+			if _, is_end := peek_token(tokenizer, arena).(tokens.Close_Bracket); is_end {
+				next_token(tokenizer, arena)
+				break
+			}
+
+			// expect next identifier field name
+			ident_tok := next_token(tokenizer, arena)
+			ident, is_ident := ident_tok.(tokens.Identifier)
+			if !is_ident {
+				panic("expected field name identifier in struct literal")
+			}
+
+			colon_tok := next_token(tokenizer, arena)
+			if _, is_colon := colon_tok.(tokens.Colon); !is_colon {
+				panic("expected ':' following field name identifier in struct literal")
+			}
+
+			val_expr := parse_expression(tokenizer, arena)
+			append(fields_ptr, ast.Struct_Literal_Field{name = ident.content, value = val_expr})
+
+			continue
+
+		case tokens.Close_Bracket:
+			break
+
+		case:
+			panic("expected ',' or '}' in struct literal definition")
+		}
+		break
+	}
+
+	node := new(ast.AST_Node, arena)
+	node^ = ast.Struct_Literal {
+		fields = fields_ptr,
+	}
+	return node
+}
+
+
+parse_braced_literal :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^ast.AST_Node {
+	// open bracket is already consumed
+
+	first := next_token(tokenizer, arena)
+
+	// handle empty {}
+	if _, empty := first.(tokens.Close_Bracket); empty {
+		node := new(ast.AST_Node, arena)
+		items_ptr := new([dynamic]^ast.AST_Node, arena)
+		items_ptr^ = make([dynamic]^ast.AST_Node, arena)
+		node^ = ast.Array_Literal {
+			items = items_ptr,
+		}
+		return node
+	}
+
+	// look for this syntax { identifier : ... }
+	if _, is_ident := first.(tokens.Identifier); is_ident {
+		second := peek_token(tokenizer, arena)
+		if _, is_colon := second.(tokens.Colon); is_colon {
+			// it is struct literal
+			return parse_struct_literal(tokenizer, arena, first)
+		}
+	}
+
+	// not struct literal, return token and parse as normal
+	unget_token(tokenizer, first)
+	return parse_array_literal(tokenizer, arena)
+}

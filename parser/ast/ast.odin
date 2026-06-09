@@ -64,6 +64,15 @@ Array_Literal :: struct {
 	items: ^[dynamic]^AST_Node,
 }
 
+Struct_Literal_Field :: struct {
+	name:  string,
+	value: ^AST_Node,
+}
+
+Struct_Literal :: struct {
+	fields: ^[dynamic]Struct_Literal_Field,
+}
+
 Index_Expr :: struct {
 	target: ^AST_Node,
 	index:  ^AST_Node,
@@ -152,6 +161,8 @@ AST_Node :: union {
 	Trait_Decl,
 	If_Stmt,
 	Array_Literal,
+	Struct_Literal,
+	Struct_Literal_Field,
 	Index_Expr,
 	Slice_Expr,
 	Cast_Expr,
