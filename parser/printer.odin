@@ -197,6 +197,29 @@ print_node :: proc(node: ^ast.AST_Node, indent: int) {
 			}
 		}
 
+	case ast.Struct_Literal:
+		fmt.println("Struct_Literal:")
+		print_indent(indent + 1)
+		fmt.println("Fields:")
+		if v.fields != nil {
+			for field in v.fields^ {
+				node: ast.AST_Node = field
+				print_node(&node, indent + 2)
+			}
+		} else {
+			print_indent(indent + 2)
+			fmt.println("<nil>")
+		}
+
+	case ast.Struct_Literal_Field:
+		fmt.printf("Struct_Literal_Field: %s = ", v.name)
+		if v.value != nil {
+			fmt.println()
+			print_node(v.value, indent + 1)
+		} else {
+			fmt.println("<nil>")
+		}
+
 	case ast.Index_Expr:
 		fmt.println("Index_Expr:")
 

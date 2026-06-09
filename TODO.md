@@ -20,7 +20,7 @@
 - [x] function calls (including multi-argument)
 - [x] function declaration (fn) with arguments and optional return type (-> Type)
 - [x] struct definition
-- [ ] struct literals
+- [x] struct literals
 - [ ] struct alignment
 - [ ] bit packed structs
 - [ ] simd support
