@@ -58,6 +58,8 @@
 - [ ] c foreign function interface
 - [ ] declarative macros
 - [ ] procedural macros
+- [ ] inline docstrings
+- [ ] goto
 
 # Analyzer
 - [ ] start working on it
