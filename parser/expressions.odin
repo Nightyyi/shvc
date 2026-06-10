@@ -147,6 +147,8 @@ parse_expression :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> ^as
 
 		// expecting_op remains false here cuz unary ops
 		case tokens.Assign,
+		     tokens.Plus_Assign,
+		     tokens.Minus_Assign,
 		     tokens.Plus,
 		     tokens.Minus,
 		     tokens.Star,

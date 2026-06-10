@@ -2,6 +2,8 @@
 - [x] tokenizer
 - [x] parser structure
 - [x] operators (binary and unary, precedence, right-associative =)
+- [x] plus / minus assign (+= -=) operators
+- [ ] esoteric assignment operators (/=)
 - [x] address-of (&) and pointer dereference (^) operators
 - [x] variable definition & mutation (val/mut)
 - [x] type annotations on variables (name : Type)
