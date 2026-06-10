@@ -123,8 +123,8 @@ For_Stmt :: struct {
 
 	// for i in array { }
 	// for i, index in array { }
-	iter_value_name: string,
-	iter_index_name: string, // empty if absent
+	iter_value_name: Identifier,
+	iter_index_name: Identifier, // empty if absent
 	iter_expr:       ^AST_Node,
 
 	// for init; condition; post { }

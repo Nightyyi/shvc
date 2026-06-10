@@ -452,8 +452,8 @@ parse_for_statement :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> 
 
 		node^ = ast.For_Stmt {
 			kind            = .Each,
-			iter_value_name = first_tok.content,
-			iter_index_name = index_tok.content,
+			iter_value_name = ast.Identifier{first_tok.content},
+			iter_index_name = ast.Identifier{index_tok.content},
 			iter_expr       = iter_expr,
 			body            = body,
 		}
@@ -470,7 +470,7 @@ parse_for_statement :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> 
 
 		node^ = ast.For_Stmt {
 			kind            = .Each,
-			iter_value_name = first_tok.content,
+			iter_value_name = ast.Identifier{first_tok.content},
 			iter_expr       = iter_expr,
 			body            = body,
 		}
