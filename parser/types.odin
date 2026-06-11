@@ -29,8 +29,6 @@ parse_type_from_identifier :: proc(name: string) -> types.Types {
 	return types.Custom_Type{name = name}
 }
 
-
-// TODO: rewrite to NOT be recursive
 parse_type :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> types.Types {
 	token := next_token(tokenizer, arena)
 
