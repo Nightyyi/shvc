@@ -70,7 +70,7 @@ peek_next :: proc(tokenizer: ^Tokenizer) -> (result: rune, ok: bool) #optional_o
 }
 
 spanned :: proc(tokenizer: ^Tokenizer, start: int, kind: tokens.Token) -> tokens.Spanned_Token {
-	return tokens.Spanned_Token{
+	return tokens.Spanned_Token {
 		kind = kind,
 		span = tokens.Span{start = start, end = tokenizer.cursor},
 	}

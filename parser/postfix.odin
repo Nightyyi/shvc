@@ -85,7 +85,8 @@ parse_postfix_expr :: proc(
 			start: ^ast.AST_Node = nil
 			end: ^ast.AST_Node = nil
 
-			if _, has_colon_first := peek_token(tokenizer, arena).kind.(tokens.Colon); has_colon_first {
+			if _, has_colon_first := peek_token(tokenizer, arena).kind.(tokens.Colon);
+			   has_colon_first {
 				next_token(tokenizer, arena) // consume :
 
 				if _, closes := peek_token(tokenizer, arena).kind.(tokens.Close_SB); !closes {

@@ -147,7 +147,7 @@ parse_struct_literal_with_type :: proc(
 	fields_ptr := new([dynamic]ast.Struct_Literal_Field, arena)
 	fields_ptr^ = make([dynamic]ast.Struct_Literal_Field, arena)
 
-  // consume : for first k-v mapping
+	// consume : for first k-v mapping
 	next_token(tokenizer, arena)
 
 	// extract first field value recursively

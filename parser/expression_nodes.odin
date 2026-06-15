@@ -32,7 +32,10 @@ precedence :: proc(item: Op_Item) -> u8 {
 	panic("precedence input token not an operator") // TODO: proper error handling
 }
 
-create_leaf_node :: proc(token: tokens.Spanned_Token, alloc: runtime.Allocator) -> ^ast.AST_Node { 	// alloc should be in the arena
+create_leaf_node :: proc(
+	token: tokens.Spanned_Token,
+	alloc: runtime.Allocator,
+) -> ^ast.AST_Node { 	// alloc should be in the arena
 	node := new(ast.AST_Node, alloc)
 
 	#partial switch t in token.kind {
