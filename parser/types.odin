@@ -29,12 +29,10 @@ parse_type_from_identifier :: proc(name: string) -> types.Types {
 	return types.Custom_Type{name = name}
 }
 
-
-// TODO: rewrite to NOT be recursive
 parse_type :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> types.Types {
 	token := next_token(tokenizer, arena)
 
-	#partial switch t in token {
+	#partial switch t in token.kind {
 	case tokens.Caret:
 		elem_type := parse_type(tokenizer, arena)
 		return types.Pointer{elem = new_clone(elem_type, arena)}
@@ -45,7 +43,7 @@ parse_type :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> types.Typ
 
 		next := peek_token(tokenizer, arena)
 
-		#partial switch nt in next {
+		#partial switch nt in next.kind {
 		case tokens.Close_SB:
 			// []i32
 			next_token(tokenizer, arena)
@@ -55,7 +53,7 @@ parse_type :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> types.Typ
 			// [?]i32
 			next_token(tokenizer, arena)
 
-			if _, ok := next_token(tokenizer, arena).(tokens.Close_SB); !ok {
+			if _, ok := next_token(tokenizer, arena).kind.(tokens.Close_SB); !ok {
 				panic("expected ']' after '?' in array type")
 			}
 
@@ -66,7 +64,7 @@ parse_type :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> types.Typ
 			if nt.content == "dynamic" {
 				next_token(tokenizer, arena)
 
-				if _, ok := next_token(tokenizer, arena).(tokens.Close_SB); !ok {
+				if _, ok := next_token(tokenizer, arena).kind.(tokens.Close_SB); !ok {
 					panic("expected ']' after dynamic in array type")
 				}
 
@@ -85,7 +83,7 @@ parse_type :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> types.Typ
 
 			count = int(nt.content)
 
-			if _, ok := next_token(tokenizer, arena).(tokens.Close_SB); !ok {
+			if _, ok := next_token(tokenizer, arena).kind.(tokens.Close_SB); !ok {
 				panic("expected ']' after array count")
 			}
 
