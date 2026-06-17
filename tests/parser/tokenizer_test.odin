@@ -1,0 +1,48 @@
+package parser_test
+
+import "../../parser"
+import "../../parser/tokens"
+import "core:fmt"
+import "core:mem/virtual"
+import "core:strings"
+import "core:testing"
+
+LARGE_SRC :: #load("fixtures/main.shv", string)
+EXPECTED_TOK :: #load("fixtures/main.shv.tokens", string)
+
+@(test)
+test_entire_token_chain :: proc(t: ^testing.T) {
+	arena: virtual.Arena
+	_ = virtual.arena_init_growing(&arena)
+	alloc := virtual.arena_allocator(&arena)
+	defer virtual.arena_destroy(&arena)
+
+	tokenizer := parser.new_tokenizer(alloc)
+	parser.inject_src(tokenizer, LARGE_SRC)
+
+	expected_clean, _ := strings.replace_all(EXPECTED_TOK, "\r\n", "\n", alloc)
+	expected_lines := strings.split_lines(strings.trim_space(expected_clean), alloc)
+
+	actual_lines := make([dynamic]string, alloc)
+
+	for {
+		spanned := parser.next_token(tokenizer, alloc)
+		token_str := fmt.tprintf("%v", spanned.kind)
+		append(&actual_lines, strings.trim_space(token_str))
+
+		if _, is_eof := spanned.kind.(tokens.Eof); is_eof {
+			break
+		}
+	}
+
+	max_lines := max(len(expected_lines), len(actual_lines))
+
+	for i := 0; i < max_lines; i += 1 {
+		exp := i < len(expected_lines) ? expected_lines[i] : "<END OF STREAM>"
+		act := i < len(actual_lines) ? actual_lines[i] : "<END OF STREAM>"
+		if exp != act {
+			fmt.println("on line:", i + 1, "expected:", exp, "actual:", act)
+			testing.fail(t)
+		}
+	}
+}
