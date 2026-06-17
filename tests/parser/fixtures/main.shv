@@ -1,0 +1,22 @@
+val a: i32 = 12
+mut val b: i32 = 12
+b += 1
+
+struct Foo {
+  field1: i32,
+  field2: i32,
+}
+
+fn main(arg1: i32) -> Foo {
+  if a == 12 {
+    println("hi")
+  } else if a == 13 {
+    println("hi2")
+  } else {
+    println ("hi3")
+  }
+
+  val c: Foo = {field1: 12, field2: 12}
+
+  return Foo{field1: 13, field2: 13}
+}
