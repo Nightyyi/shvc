@@ -22,6 +22,7 @@ Colon :: struct {} // :
 Arrow :: struct {} // ->
 Caret :: struct {} // ^
 Ampersand :: struct {} // &
+Percentage :: struct {} // %
 Assign :: struct {} // =
 Comma :: struct {} // ,
 Semi_Colon :: struct {} // ;
@@ -109,6 +110,7 @@ Token :: union {
 	Greater,
 	Plus_Assign,
 	Minus_Assign,
+  Percentage,
 
 	// brackets
 	Open_Paren,
