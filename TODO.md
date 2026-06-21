@@ -23,7 +23,8 @@
 - [x] function declaration (fn) with arguments and optional return type (-> Type)
 - [x] struct definition
 - [x] struct literals
-- [x] struct alignment
+- [ ] struct alignment
+- [x] struct field sorting
 - [ ] bit packed structs
 - [ ] simd support
 - [ ] simd vector types
