@@ -202,6 +202,8 @@ parse_struct_signature :: proc(
 		}
 	}
 
+  sort_struct_fields(structure.fields)
+  
 	return structure
 }
 
