@@ -4,9 +4,13 @@ b += 1
 b *= 2
 b /= 3
 
-struct Foo {
+struct Alot {
   field1: i32,
-  field2: i32,
+  field2: i16,
+  field3: i32,
+  field4: i8,
+  field5: i64,
+  field6: i8,
 }
 
 trait Bar {

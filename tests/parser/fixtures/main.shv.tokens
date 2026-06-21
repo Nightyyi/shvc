@@ -29,6 +29,34 @@ Identifier{content = "i32"}
 Comma{}
 Identifier{content = "field2"}
 Colon{}
+Identifier{content = "i16"}
+Comma{}
+Identifier{content = "field3"}
+Colon{}
+Identifier{content = "i32"}
+Comma{}
+Identifier{content = "field4"}
+Colon{}
+Identifier{content = "i8"}
+Comma{}
+Identifier{content = "field5"}
+Colon{}
+Identifier{content = "i64"}
+Comma{}
+Identifier{content = "field6"}
+Colon{}
+Identifier{content = "i8"}
+Comma{}
+Close_Bracket{}
+Struct{}
+Identifier{content = "Foo"}
+Open_Bracket{}
+Identifier{content = "field1"}
+Colon{}
+Identifier{content = "i32"}
+Comma{}
+Identifier{content = "field2"}
+Colon{}
 Identifier{content = "i32"}
 Comma{}
 Close_Bracket{}
@@ -99,6 +127,26 @@ Identifier{content = "Foo"}
 Assign{}
 Open_Bracket{}
 Identifier{content = "field1"}
+Colon{}
+Int_Literal{content = 12}
+Comma{}
+Identifier{content = "field2"}
+Colon{}
+Int_Literal{content = 12}
+Close_Bracket{}
+Return{}
+Identifier{content = "Foo"}
+Open_Bracket{}
+Identifier{content = "field1"}
+Colon{}
+Int_Literal{content = 13}
+Comma{}
+Identifier{content = "field2"}
+Colon{}
+Int_Literal{content = 13}
+Close_Bracket{}
+Close_Bracket{}
+Eof{}
 Colon{}
 Int_Literal{content = 12}
 Comma{}

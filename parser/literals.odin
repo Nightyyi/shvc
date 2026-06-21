@@ -43,7 +43,6 @@ parse_array_literal :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> 
 					break
 				}
 				continue
-
 			case tokens.Close_Bracket:
 				break
 
@@ -116,10 +115,12 @@ parse_struct_literal :: proc(
 		break
 	}
 
+
 	node := new(ast.AST_Node, arena)
 	node^ = ast.Struct_Literal {
 		fields = fields_ptr,
 	}
+	sort_struct_literal(node^.(ast.Struct_Literal).fields)
 	return node
 }
 
@@ -210,6 +211,7 @@ parse_struct_literal_with_type :: proc(
 		type   = type_node,
 		fields = fields_ptr,
 	}
+	sort_struct_literal(node^.(ast.Struct_Literal).fields)
 	return node
 }
 

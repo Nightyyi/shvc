@@ -22,7 +22,7 @@ Program:
     Identifier: b
     Int_Literal: 3
   Struct_Decl: Foo
-    Fields: [field1: Integer32{}, field2: Integer32{}]
+    Fields: [field5: Integer64{}, field1: Integer32{}, field3: Integer32{}, field2: Integer16{}, field4: Integer8{}, field6: Integer8{}]
   Trait_Decl: Bar
     Methods:
       Fn_Decl: a

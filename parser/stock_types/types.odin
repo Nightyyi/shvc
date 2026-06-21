@@ -23,6 +23,7 @@ Bool :: struct {}
 
 Integer :: struct {}
 Integer8 :: struct {}
+Integer16 :: struct {}
 Integer32 :: struct {}
 Integer64 :: struct {}
 
@@ -59,6 +60,7 @@ Types :: union {
 	Bool,
 	Integer,
 	Integer8,
+	Integer16,
 	Integer32,
 	Integer64,
 	Float32,

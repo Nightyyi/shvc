@@ -20,6 +20,36 @@ import "base:runtime"
 import types "stock_types"
 import "tokens"
 
+type_to_size :: proc(type_in: types.Types) -> i32 {
+  #partial switch typed_value in type_in {
+	case types.Unit:
+		return 1
+	case types.Bool:
+		return 1 
+	case types.Integer:
+		return size_of(int)
+	case types.Integer8:
+		return 1
+	case types.Integer16:
+		return 2
+	case types.Integer32:
+		return 4
+  case types.Integer64:
+		return 8
+	case types.Float32:
+		return 4
+	case types.Float64:
+		return 8 
+	case types.String:
+		return -1
+	case types.Array:
+		return -2
+	}
+
+	return -2 
+}
+
+
 parse_type_from_identifier :: proc(name: string) -> types.Types {
 	switch name {
 	case "unit":
@@ -30,6 +60,8 @@ parse_type_from_identifier :: proc(name: string) -> types.Types {
 		return types.Integer{}
 	case "i8":
 		return types.Integer8{}
+	case "i16":
+		return types.Integer16{}
 	case "i32":
 		return types.Integer32{}
 	case "i64":
