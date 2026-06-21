@@ -43,6 +43,7 @@ parse_array_literal :: proc(tokenizer: ^Tokenizer, arena: runtime.Allocator) -> 
 					break
 				}
 				continue
+
 			case tokens.Close_Bracket:
 				break
 
@@ -114,7 +115,6 @@ parse_struct_literal :: proc(
 		}
 		break
 	}
-
 
 	node := new(ast.AST_Node, arena)
 	node^ = ast.Struct_Literal {
